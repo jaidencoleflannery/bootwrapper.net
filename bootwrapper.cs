@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 namespace bootwrapper;
 
@@ -36,10 +37,10 @@ public static class Program {
                 CreateNoWindow = true
             }
         }) {
-            securityProcess.StartInfo.ArgumentList.Add("find-generic-password"); // macos keychain cli command.
-            securityProcess.StartInfo.ArgumentList.Add($"-l"); // match by label.
-            securityProcess.StartInfo.ArgumentList.Add($"{name}"); // label.
-            securityProcess.StartInfo.ArgumentList.Add($"-w"); // only output the password value.
+            securityProcess.StartInfo.ArgumentList.Add($"find-generic-password"); // macos keychain.
+            securityProcess.StartInfo.ArgumentList.Add($"-w"); // plain.
+            securityProcess.StartInfo.ArgumentList.Add($"-s"); // match by label.
+            securityProcess.StartInfo.ArgumentList.Add($"{name}"); // label. 
 
             securityProcess.Start();
             string result = (await securityProcess.StandardOutput.ReadToEndAsync()).Trim();
@@ -49,9 +50,9 @@ public static class Program {
                 string error = (await securityProcess.StandardError.ReadToEndAsync()).Trim();
                 throw new InvalidOperationException($"\n* Key {name} was not found in Keychain Access, failed to boot.\nError returned:\n{error}");
             }
-
+            
+            Console.WriteLine($"{name}: {result}");
             return result;
         }
     }
-
 }
